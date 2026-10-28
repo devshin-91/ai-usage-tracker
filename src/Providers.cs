@@ -378,7 +378,7 @@ namespace AIUsageTracker
                 needsLogin = false;
                 usageLastRun = DateTime.MinValue;
                 ForceRefresh = false;
-                s.Lines.Add(L.T("한도 %: 설정에서 'agy 한도 조회'를 켜면 표시"));
+                s.Lines.Add(L.T("한도 %: 설정에서 'Antigravity 한도 조회'를 켜면 표시"));
             }
             else if (Due(ref usageLastRun, LimitIntervalSec) && !usageDisabled) RunUsageCommand();
             if (needsLogin) s.NeedLogin("agy", cliExe, cliIsScript, "");

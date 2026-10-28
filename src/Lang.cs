@@ -151,7 +151,7 @@ namespace AIUsageTracker
                 "Google says wrapping agy inside other applications is not supported on consumer plans, and terms violations can lead to account suspension.\nThis only runs the /usage command (no model calls), but turning it on is your call. Turn it on?",
                 "Google は、コンシューマープランでは他のアプリが agy をラップして実行することをサポートしていないと案内しており、規約違反はアカウント停止につながる可能性があります。\nこの機能はモデルを呼び出さない /usage コマンドのみを実行しますが、オンにするかはご自身の判断です。オンにしますか？",
                 "Google 表示消费者方案不支持由其他应用封装运行 agy，违反条款可能导致账号被停用。\n此功能只运行不调用模型的 /usage 命令，但是否开启由你自行判断。要开启吗？");
-            Add("한도 %: 설정에서 'agy 한도 조회'를 켜면 표시", "Limits: turn on 'Antigravity limits' in Settings", "上限: 設定で「Antigravity の上限を取得」をオンにすると表示", "限额: 在设置中开启“Antigravity 限额查询”后显示");
+            Add("한도 %: 설정에서 'Antigravity 한도 조회'를 켜면 표시", "Limits: turn on 'Antigravity limits' in Settings", "上限: 設定で「Antigravity の上限を取得」をオンにすると表示", "限额: 在设置中开启“Antigravity 限额查询”后显示");
             Add("연동됨", "Connected", "連携中", "已连接");
             Add("연동 안 됨", "Not connected", "未連携", "未连接");
             Add("exe 위치가 바뀜", "exe was moved", "exe の場所が変更されました", "exe 位置已变更");
