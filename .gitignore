@@ -1,0 +1,4 @@
+# Build output and per-user runtime data (settings, statusLine snapshot)
+dist/
+data/
+*.tmp
