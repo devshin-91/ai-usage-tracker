@@ -144,29 +144,6 @@ namespace AIUsageTracker
             }
             y += S(30);
 
-            // agy 조회는 Google 안내상 소비자 플랜에서 지원되지 않는 사용 방식이라 직접 켜야만 동작한다
-            var agy = AddCheck(L.T("Antigravity 한도 조회 (agy CLI 실행)"), settings.GetBool("Antigravity.QueryCli", false), ref y, pad);
-            agy.CheckedChanged += delegate
-            {
-                if (agy.Checked && MessageBox.Show(this, L.T("Google은 소비자 플랜에서 다른 앱이 agy를 감싸 실행하는 것을 지원하지 않는다고 안내하며, 약관 위반 시 계정이 정지될 수 있습니다.\n이 기능은 모델을 호출하지 않는 /usage 명령만 실행하지만, 켜는 것은 본인 판단입니다. 켤까요?"),
-                        L.T("AI 사용량"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                {
-                    BeginInvoke(new Action(Build));   // 체크 취소
-                    return;
-                }
-                settings.Set("Antigravity.QueryCli", agy.Checked);
-                Apply();
-            };
-            var agyHint = new Label();
-            agyHint.Text = L.T("기본은 꺼짐. 끈 상태에서도 오늘 활동과 실행 여부는 표시됩니다.");
-            agyHint.Font = smallFont;
-            agyHint.ForeColor = Dim;
-            agyHint.AutoSize = true;
-            agyHint.MaximumSize = new Size(fieldX + fieldW - pad - S(18), 0);
-            agyHint.Location = new Point(pad + S(18), y - S(6));
-            Controls.Add(agyHint);
-            y += agyHint.PreferredHeight + S(4);
-
             y += S(6);
             y = Section(L.T("Claude statusLine 연동 (선택)"), y);
             var state = ClaudeIntegration.Check();

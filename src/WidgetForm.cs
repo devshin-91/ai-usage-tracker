@@ -101,18 +101,6 @@ namespace AIUsageTracker
             foreach (var p in providers)
             {
                 p.Enabled = settings.GetBool("Show." + p.Name, true);
-                var antigravity = p as AntigravityProvider;
-                if (antigravity != null)
-                {
-                    bool query = settings.GetBool("Antigravity.QueryCli", false);
-                    if (query && !antigravity.QueryCli)
-                    {
-                        antigravity.ForceRefresh = true;
-                        antigravity.NextDue = DateTime.MinValue;
-                    }
-                    else if (!query && antigravity.QueryCli) antigravity.NextDue = DateTime.MinValue;
-                    antigravity.QueryCli = query;
-                }
                 if (p is CodexProvider)
                 {
                     p.IntervalSec = Provider.LimitIntervalSec;

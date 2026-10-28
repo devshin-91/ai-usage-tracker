@@ -2,7 +2,7 @@
 
 [English](README.md) | **한국어** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
-**Claude Code**, **Codex**, **Antigravity** 플랜 한도를 얼마나 썼는지 화면 위에 띄워 보여 주는 Windows 10/11용 위젯입니다. 설치 프로그램이나 런타임 설치 없이 실행 파일 하나(약 90KB)로 동작하는 포터블 앱입니다.
+**Claude Code**, **Codex** 플랜 한도를 얼마나 썼는지와 오늘의 **Antigravity** 활동을 화면 위에 띄워 보여 주는 Windows 10/11용 위젯입니다. 설치 프로그램이나 런타임 설치 없이 실행 파일 하나(약 90KB)로 동작하는 포터블 앱입니다.
 
 <p>
   <img src="docs/widget.png" alt="위젯" width="320">
@@ -34,7 +34,7 @@
 | Windows 10 / 11 | 전체 | 기본 내장 .NET Framework 4.8 사용 |
 | [Claude Code](https://code.claude.com) CLI (로그인) | Claude 한도 | Pro / Max / Team 플랜. API 키 사용자는 토큰 합계만 표시 |
 | [Codex CLI](https://github.com/openai/codex) (`npm i -g @openai/codex`, 로그인) | Codex 한도 | |
-| Antigravity / `agy` CLI | Antigravity 활동 (한도는 선택, 아래 참고) | |
+| Antigravity (IDE 또는 `agy` CLI) | Antigravity 활동 | 한도는 표시하지 않음 ([이유](#antigravity-한도를-표시하지-않는-이유)) |
 
 CLI가 없는 서비스는 "CLI를 찾을 수 없음"만 표시되고, 나머지는 그대로 동작합니다.
 
@@ -56,7 +56,6 @@ CLI가 없는 서비스는 "CLI를 찾을 수 없음"만 표시되고, 나머지
 | 항상 위에 표시 | 다른 창 위에 고정 |
 | Windows 시작 시 자동 실행 | `HKCU\...\Run`에 등록/삭제. 관리자 권한 불필요 |
 | 표시할 서비스 | 서비스별 표시 여부. 끈 서비스는 조회하지 않습니다. |
-| Antigravity 한도 조회 | **기본 꺼짐.** [아래](#antigravity-한도-조회는-선택) 참고 |
 | Claude statusLine 연동 | 터미널 세션에서 실시간 갱신 (선택). 아래 참고 |
 
 ## 데이터를 가져오는 방식
@@ -68,7 +67,6 @@ CLI가 없는 서비스는 "CLI를 찾을 수 없음"만 표시되고, 나머지
 | Claude Code | 오늘 토큰 | `~/.claude/projects/**/*.jsonl` (읽기 전용) |
 | Codex | 로그인 여부, 한도, 플랜, 크레딧 | `codex app-server` JSON-RPC: `account/read`, `account/rateLimits/read` |
 | Antigravity | 오늘 대화 수, 실행 여부 | `~/.gemini/antigravity*/conversations` 파일 시각, 프로세스 목록 |
-| Antigravity | 한도 (선택) | `agy -p "/usage" --output-format json` (에이전트 턴 없음, 할당량 사용 없음) |
 
 **하지 않는 것:** `~/.claude/.credentials.json`, `~/.codex/auth.json` 등 인증 정보 읽기, 서비스 서버에 직접 요청, 데이터 외부 전송. 네트워크 통신은 모두 공식 CLI가 합니다.
 
@@ -80,11 +78,10 @@ CLI가 없는 서비스는 "CLI를 찾을 수 없음"만 표시되고, 나머지
 |---|---|---|---|
 | Claude Code | `loggedIn: false` | **로그인 필요** + 링크 | `claude auth login` |
 | Codex | `account: null` | **로그인 필요** + 링크 | `codex login` |
-| Antigravity (켰을 때) | "not logged in" / "authentication required" | **로그인 필요** + 링크 | `agy` |
 
 **클릭하여 로그인: …** 을 누르면 그 명령을 실행하는 터미널이 열립니다. 이후 10분 동안 15초마다 다시 확인하므로, 로그인이 끝나면 바로 한도가 표시됩니다.
 
-위젯이 보는 것은 **CLI**의 로그인입니다. Codex는 앱과 CLI가 로그인을 공유하지만, Claude 데스크톱 앱과 Antigravity IDE는 CLI와 로그인이 따로입니다.
+위젯이 보는 것은 **CLI**의 로그인입니다. Codex는 앱과 CLI가 로그인을 공유하지만, Claude 데스크톱 앱은 Claude Code와 로그인이 따로입니다.
 
 ## 상위 플랜
 
@@ -92,7 +89,6 @@ CLI가 알려 주는 한도를 개수에 상관없이 모두 표시합니다.
 
 - **Claude Code:** `Current week (Sonnet only)` (Max/Team), `Current week (Opus 4.6)` 같은 모델별 줄
 - **Codex:** `rateLimitsByLimitId`의 추가 버킷(예: 프런티어 모델)을 소제목과 함께 별도 줄로, 지출 한도 줄
-- **Antigravity:** 한도가 여러 개인 그룹(일간+주간)을 소제목으로
 
 <img src="docs/high-tier-example.png" alt="상위 플랜 예시" width="320">
 
@@ -107,9 +103,9 @@ CLI가 알려 주는 한도를 개수에 상관없이 모두 표시합니다.
 
 Claude 데스크톱 앱만 쓴다면 효과가 없습니다. **해제**하면 이전에 쓰던 statusLine이 복원됩니다.
 
-## Antigravity 한도 조회는 선택
+## Antigravity 한도를 표시하지 않는 이유
 
-Google의 Antigravity FAQ는 소비자 플랜에서 다른 앱이 `agy`를 감싸 실행하는 것을 지원하지 않는다고 안내하고, [추가 약관](https://antigravity.google/terms) 6조는 서드파티 도구로 서비스에 접근하면 계정이 정지될 수 있다고 명시합니다. 위젯은 읽기 전용 `/usage` 명령만 실행하지만, 이 기능은 **기본으로 꺼져 있습니다**. 켤 때 경고가 먼저 나오며, 켜는 것은 본인 판단입니다. 꺼 두어도 `agy`를 실행하지 않고 로컬 파일로 오늘 활동은 표시합니다.
+Google의 [Antigravity 추가 약관](https://antigravity.google/terms) 6조는 서드파티 소프트웨어로 서비스에 접근하는 것을 약관 위반으로 보고, [Antigravity FAQ](https://antigravity.google/docs/faq/)는 소비자 플랜에서 다른 앱이 `agy`를 감싸 실행하는 것을 지원하지 않는다고 안내합니다. 그래서 이 위젯은 **`agy`를 실행하거나 Antigravity와 통신하지 않습니다**. `~/.gemini/antigravity*/conversations`의 파일 시각과 로컬 프로세스 목록만 읽어 오늘 활동을 표시합니다. 한도는 Antigravity에서 직접 확인하세요 (CLI의 `/usage`, IDE의 모델 선택 메뉴).
 
 ## 문제 해결
 
@@ -120,7 +116,7 @@ AIUsageTracker.exe --diagnose --lang en | Out-String
 
 `--diagnose`는 위젯과 같은 코드로 각 서비스를 한 번 조회해 결과를 출력합니다. 이메일이나 계정 ID는 출력하지 않습니다.
 
-CLI가 표준 위치에 없으면 `AI_USAGE_TRACKER_CLAUDE_PATH`, `AI_USAGE_TRACKER_CODEX_PATH`, `AI_USAGE_TRACKER_AGY_PATH` 환경 변수에 전체 경로를 지정하세요.
+CLI가 표준 위치에 없으면 `AI_USAGE_TRACKER_CLAUDE_PATH`, `AI_USAGE_TRACKER_CODEX_PATH` 환경 변수에 전체 경로를 지정하세요.
 
 ## 소스에서 빌드
 

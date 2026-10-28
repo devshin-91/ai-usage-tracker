@@ -219,21 +219,10 @@ namespace AIUsageTracker
         }
     }
 
-    // 한도 %는 Antigravity CLI의 공식 print 모드 명령 agy -p "/usage" (에이전트 턴·할당량 소모 없음)로,
-    // 오늘 활동은 로컬 대화 파일과 프로세스로 표시한다.
+    // Antigravity 약관(추가 약관 6조)과 FAQ는 서드파티 앱이 서비스에 접근하거나 agy를 감싸 실행하는 것을 허용하지 않는다.
+    // 그래서 agy는 실행하지 않고, 이 PC의 대화 파일 시각과 프로세스 목록으로 오늘 활동만 표시한다.
     class AntigravityProvider : Provider
     {
-        DateTime usageLastRun = DateTime.MinValue;
-        bool usageDisabled;
-        List<CachedWindow> usageWindows;
-        DateTime? usageAt;
-        Func<string> usageError;
-        bool needsLogin;
-        string cliExe;
-        bool cliIsScript;
-
-        public volatile bool QueryCli;   // 설정 'agy 한도 조회' (기본 꺼짐)
-
         public AntigravityProvider()
         {
             Name = "Antigravity";
@@ -241,153 +230,11 @@ namespace AIUsageTracker
             IntervalSec = 30;
         }
 
-        void RunUsageCommand()
-        {
-            bool isScript;
-            string exe = Cli.Find("agy", new[]
-            {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"agy\bin\agy.exe"),
-            }, out isScript);
-            needsLogin = false;
-            cliExe = exe;
-            cliIsScript = isScript;
-            if (exe == null)
-            {
-                usageWindows = null;
-                usageError = () => L.F("{0} CLI를 찾을 수 없음", "agy");
-                return;
-            }
-
-            try
-            {
-                // print 모드에서 로그아웃 상태면 브라우저를 열지 않고 stderr에 "not logged in" 류의 오류를 낸다
-                string stderr;
-                string stdout = Cli.Run(exe, isScript, "-p \"/usage\" --output-format json", 30, out stderr);
-                var root = Cli.ParseJson(stdout);
-                if (Cli.LooksLoggedOut(stderr) || (root == null || Json.Str(root, "status") != "SUCCESS") && Cli.LooksLoggedOut(stdout))
-                {
-                    needsLogin = true;
-                    usageWindows = null;
-                    usageError = null;
-                    return;
-                }
-                if (root == null)
-                {
-                    usageError = () => FirstLine(stderr) ?? L.T("/usage 결과를 읽을 수 없음");
-                    return;
-                }
-                // 슬래시 명령으로 처리되지 않고 에이전트 턴이 돌았다면 할당량 보호를 위해 이후 호출을 멈춘다
-                double? turns = Json.Num(root, "num_turns");
-                if (Json.Str(root, "command", "name") != "usage" || (turns.HasValue && turns.Value > 0))
-                {
-                    if (Json.Str(root, "status") != "SUCCESS")
-                    {
-                        usageError = () => Json.Str(root, "error") ?? Json.Str(root, "response") ?? L.T("조회 실패");
-                        return;
-                    }
-                    usageDisabled = true;
-                    usageError = () => L.T("이 버전은 /usage 비대화형 조회를 지원하지 않음");
-                    return;
-                }
-
-                var windows = new List<CachedWindow>();
-                var groups = Json.Get(root, "command", "data", "groups") as object[];
-                if (groups != null)
-                {
-                    foreach (var g in groups)
-                    {
-                        var buckets = Json.Get(g, "buckets") as object[];
-                        if (buckets == null) continue;
-                        string group = ShortGroup(Json.Str(g, "name") ?? "");
-                        foreach (var b in buckets)
-                        {
-                            double? remaining = Json.Num(b, "remaining_fraction");
-                            DateTime reset;
-                            DateTime? resetAt = null;
-                            if (DateTime.TryParse(Json.Str(b, "reset_time"), CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out reset))
-                                resetAt = reset.ToLocalTime();
-                            string window = Json.Str(b, "window");
-                            // 그룹에 한도가 하나면 그룹 이름이 곧 줄 이름, 여러 개면(상위 플랜의 일간+주간 등) 그룹을 소제목으로
-                            bool several = buckets.Length > 1;
-                            string key = Json.Str(b, "id") ?? group + ":" + window;
-                            Func<string> heading = several ? (Func<string>)(() => group) : null;
-                            Func<string> label = () => several ? WindowName(window) : group;
-                            // 다른 서비스와 맞춰 '사용한 %'로 표시
-                            windows.Add(new CachedWindow(key, heading, label,
-                                remaining.HasValue ? (double?)Math.Round((1 - remaining.Value) * 100, 1) : null, resetAt));
-                        }
-                    }
-                }
-                if (windows.Count == 0)
-                {
-                    usageError = () => L.T("한도 정보 없음");
-                    return;
-                }
-                usageWindows = windows;
-                usageAt = DateTime.Now;
-                usageError = null;
-            }
-            catch (TimeoutException)
-            {
-                usageError = () => L.T("/usage 응답 시간 초과");
-            }
-            catch (Exception ex)
-            {
-                usageError = () => L.F("/usage 실패: {0}", ex.Message);
-            }
-        }
-
-        static string FirstLine(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return null;
-            foreach (var line in text.Split('\n'))
-                if (line.Trim().Length > 0) return line.Trim();
-            return null;
-        }
-
-        // "Gemini Models" → "Gemini", "Claude and GPT models" → "Claude·GPT"
-        static string ShortGroup(string name)
-        {
-            name = Regex.Replace(name, @"\s+models?$", "", RegexOptions.IgnoreCase);
-            return Regex.Replace(name, @"\s+and\s+", "·", RegexOptions.IgnoreCase).Trim();
-        }
-
-        static string WindowName(string window)
-        {
-            switch ((window ?? "").ToLowerInvariant())
-            {
-                case "weekly": return L.T("주간");
-                case "daily": return L.T("일간");
-                case "monthly": return L.T("월간");
-                case "five_hour":
-                case "5h": return L.T("5시간");
-                default: return window ?? L.T("한도");
-            }
-        }
-
         public override ServiceStatus Fetch()
         {
             var s = NewStatus();
-            // Google은 소비자 플랜에서 다른 앱이 agy를 감싸 실행하는 것을 지원하지 않는다고 안내한다.
-            // 그래서 agy 조회는 사용자가 설정에서 직접 켠 경우에만 하고, 기본은 로컬 활동만 표시한다.
-            if (!QueryCli)
-            {
-                usageWindows = null;
-                usageError = null;
-                needsLogin = false;
-                usageLastRun = DateTime.MinValue;
-                ForceRefresh = false;
-                s.Lines.Add(L.T("한도 %: 설정에서 'Antigravity 한도 조회'를 켜면 표시"));
-            }
-            else if (Due(ref usageLastRun, LimitIntervalSec) && !usageDisabled) RunUsageCommand();
-            if (needsLogin) s.NeedLogin("agy", cliExe, cliIsScript, "");
-            if (usageWindows != null)
-            {
-                foreach (var w in usageWindows) s.Windows.Add(w.ToWindow());
-                s.UpdatedAt = usageAt;
-            }
-            if (usageError != null) s.Lines.Add(L.F("한도 %: {0}", usageError()));
+            ForceRefresh = false;
+            s.Lines.Add(L.T("한도 %: 약관상 외부 조회 불가 (앱에서 확인)"));
 
             string gemini = Path.Combine(Paths.Home, ".gemini");
             var roots = new[] { Path.Combine(gemini, "antigravity"), Path.Combine(gemini, "antigravity-cli") };

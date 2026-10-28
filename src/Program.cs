@@ -11,8 +11,8 @@ using System.Windows.Forms;
 [assembly: AssemblyTitle("AI Usage Tracker")]
 [assembly: AssemblyDescription("Floating usage widget for Claude Code, Codex and Antigravity")]
 [assembly: AssemblyProduct("AI Usage Tracker")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 
 namespace AIUsageTracker
 {
@@ -65,9 +65,7 @@ namespace AIUsageTracker
             if (langIndex >= 0 && langIndex + 1 < args.Length) L.Lang = args[langIndex + 1];
 
             var sb = new System.Text.StringBuilder();
-            var antigravity = new AntigravityProvider();
-            antigravity.QueryCli = new Settings().GetBool("Antigravity.QueryCli", false) || Array.IndexOf(args, "--agy") >= 0;
-            foreach (Provider p in new Provider[] { new ClaudeProvider(), new CodexProvider(), antigravity })
+            foreach (Provider p in new Provider[] { new ClaudeProvider(), new CodexProvider(), new AntigravityProvider() })
             {
                 ServiceStatus s;
                 try { s = p.Fetch(); }

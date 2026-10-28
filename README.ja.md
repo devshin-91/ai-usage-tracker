@@ -2,7 +2,7 @@
 
 [English](README.md) | [한국어](README.ko.md) | **日本語** | [简体中文](README.zh-CN.md)
 
-**Claude Code**、**Codex**、**Antigravity** のプラン上限をどれだけ使ったかを画面上に表示する、Windows 10/11 向けのフローティングウィジェットです。インストーラーやランタイムは不要で、実行ファイル 1 つ（約 90KB）で動くポータブルアプリです。
+**Claude Code** と **Codex** のプラン上限をどれだけ使ったか、そして今日の **Antigravity** の活動を画面上に表示する、Windows 10/11 向けのフローティングウィジェットです。インストーラーやランタイムは不要で、実行ファイル 1 つ（約 90KB）で動くポータブルアプリです。
 
 <p>
   <img src="docs/widget.png" alt="ウィジェット" width="320">
@@ -34,7 +34,7 @@
 | Windows 10 / 11 | すべて | 標準搭載の .NET Framework 4.8 を使用 |
 | [Claude Code](https://code.claude.com) CLI（ログイン済み） | Claude の上限 | Pro / Max / Team プラン。API キー利用者はトークン合計のみ |
 | [Codex CLI](https://github.com/openai/codex)（`npm i -g @openai/codex`、ログイン済み） | Codex の上限 | |
-| Antigravity / `agy` CLI | Antigravity の活動（上限は任意、下記参照） | |
+| Antigravity（IDE または `agy` CLI） | Antigravity の活動 | 上限は表示しません（[理由](#antigravity-の上限を表示しない理由)） |
 
 CLI がないサービスは「CLI が見つかりません」と表示されるだけで、他は通常どおり動作します。
 
@@ -56,7 +56,6 @@ CLI がないサービスは「CLI が見つかりません」と表示される
 | 常に手前に表示 | 他のウィンドウより前面に固定 |
 | Windows 起動時に自動実行 | `HKCU\...\Run` に登録 / 削除。管理者権限は不要 |
 | 表示するサービス | サービスごとの表示切り替え。オフのサービスは照会しません。 |
-| Antigravity の上限を取得 | **既定はオフ。**[下記](#antigravity-の上限取得は任意)参照 |
 | Claude statusLine 連携 | ターミナルのセッションからリアルタイム更新（任意）。下記参照 |
 
 ## データの取得方法
@@ -68,7 +67,6 @@ CLI がないサービスは「CLI が見つかりません」と表示される
 | Claude Code | 今日のトークン | `~/.claude/projects/**/*.jsonl`（読み取り専用） |
 | Codex | ログイン状態、上限、プラン、クレジット | `codex app-server` JSON-RPC: `account/read`、`account/rateLimits/read` |
 | Antigravity | 今日の会話数、実行状態 | `~/.gemini/antigravity*/conversations` のファイル時刻、プロセス一覧 |
-| Antigravity | 上限（任意） | `agy -p "/usage" --output-format json`（エージェントのターンなし、クォータ消費なし） |
 
 **行わないこと:** `~/.claude/.credentials.json`、`~/.codex/auth.json` などの認証情報の読み取り、サービスのサーバーへの直接リクエスト、外部へのデータ送信。ネットワーク通信はすべて公式 CLI が行います。
 
@@ -80,11 +78,10 @@ CLI がないサービスは「CLI が見つかりません」と表示される
 |---|---|---|---|
 | Claude Code | `loggedIn: false` | **ログインが必要** + リンク | `claude auth login` |
 | Codex | `account: null` | **ログインが必要** + リンク | `codex login` |
-| Antigravity（オン時） | "not logged in" / "authentication required" | **ログインが必要** + リンク | `agy` |
 
 **クリックしてログイン: …** を押すと、そのコマンドを実行するターミナルが開きます。その後 10 分間は 15 秒ごとに再確認するので、ログインが終わるとすぐに上限が表示されます。
 
-ウィジェットが確認するのは **CLI** のログインです。Codex はアプリと CLI でログインを共有しますが、Claude デスクトップアプリと Antigravity IDE は CLI とは別のログインです。
+ウィジェットが確認するのは **CLI** のログインです。Codex はアプリと CLI でログインを共有しますが、Claude デスクトップアプリは Claude Code とは別のログインです。
 
 ## 上位プラン
 
@@ -92,7 +89,6 @@ CLI が返す上限は数に関係なくすべて表示します。
 
 - **Claude Code:** `Current week (Sonnet only)`（Max/Team）、`Current week (Opus 4.6)` のようなモデル別の行
 - **Codex:** `rateLimitsByLimitId` の追加バケット（例: フロンティアモデル）を小見出し付きの別行で、支出上限の行
-- **Antigravity:** 上限が複数あるグループ（日間 + 週間）を小見出しで
 
 <img src="docs/high-tier-example.png" alt="上位プランの例" width="320">
 
@@ -107,9 +103,9 @@ CLI が返す上限は数に関係なくすべて表示します。
 
 Claude デスクトップアプリだけを使っている場合は効果がありません。**解除** すると以前の statusLine が復元されます。
 
-## Antigravity の上限取得は任意
+## Antigravity の上限を表示しない理由
 
-Google の Antigravity FAQ は、コンシューマープランでは他のアプリが `agy` をラップして実行することをサポートしていないと案内しており、[追加利用規約](https://antigravity.google/terms)の第 6 条は、サードパーティのツールでサービスにアクセスするとアカウントが停止される可能性があると定めています。ウィジェットは読み取り専用の `/usage` コマンドしか実行しませんが、この機能は**既定でオフ**です。オンにするときは先に警告が表示され、オンにするかはご自身の判断です。オフでも `agy` を実行せず、ローカルファイルから今日の活動を表示します。
+Google の [Antigravity 追加利用規約](https://antigravity.google/terms)第 6 条は、サードパーティのソフトウェアでサービスにアクセスすることを規約違反とし、[Antigravity FAQ](https://antigravity.google/docs/faq/) はコンシューマープランでは他のアプリが `agy` をラップして実行することをサポートしていないと案内しています。そのため、このウィジェットは **`agy` を実行せず、Antigravity と通信もしません**。`~/.gemini/antigravity*/conversations` のファイル時刻とローカルのプロセス一覧だけを読み、今日の活動を表示します。上限は Antigravity 本体で確認してください（CLI の `/usage`、IDE のモデル選択メニュー）。
 
 ## トラブルシューティング
 
@@ -120,7 +116,7 @@ AIUsageTracker.exe --diagnose --lang ja | Out-String
 
 `--diagnose` はウィジェットと同じコードで各サービスを 1 回照会し、結果を出力します。メールアドレスやアカウント ID は出力しません。
 
-CLI が標準以外の場所にある場合は、環境変数 `AI_USAGE_TRACKER_CLAUDE_PATH`、`AI_USAGE_TRACKER_CODEX_PATH`、`AI_USAGE_TRACKER_AGY_PATH` にフルパスを指定してください。
+CLI が標準以外の場所にある場合は、環境変数 `AI_USAGE_TRACKER_CLAUDE_PATH`、`AI_USAGE_TRACKER_CODEX_PATH` にフルパスを指定してください。
 
 ## ソースからビルド
 

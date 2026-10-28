@@ -2,7 +2,7 @@
 
 **English** | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
-A small floating widget for Windows 10/11 that shows how much of your **Claude Code**, **Codex**, and **Antigravity** plan limits you have used. It is a single portable `.exe` (about 90 KB) with no installer and no runtime to install.
+A small floating widget for Windows 10/11 that shows how much of your **Claude Code** and **Codex** plan limits you have used, plus today's **Antigravity** activity. It is a single portable `.exe` (about 90 KB) with no installer and no runtime to install.
 
 <p>
   <img src="docs/widget.png" alt="Widget" width="320">
@@ -34,7 +34,7 @@ A small floating widget for Windows 10/11 that shows how much of your **Claude C
 | Windows 10 / 11 | Everything | Uses the built-in .NET Framework 4.8 |
 | [Claude Code](https://code.claude.com) CLI, signed in | Claude limits | Pro / Max / Team plan. API-key users only see token totals. |
 | [Codex CLI](https://github.com/openai/codex) (`npm i -g @openai/codex`), signed in | Codex limits | |
-| Antigravity / `agy` CLI | Antigravity activity (limits are opt-in, see below) | |
+| Antigravity (IDE or `agy` CLI) | Antigravity activity | Limits are not shown ([why](#why-antigravity-limits-are-not-shown)) |
 
 A service whose CLI is missing just shows a "CLI not found" line; the others keep working.
 
@@ -56,7 +56,6 @@ Changes apply immediately.
 | Always on top | Keep the widget above other windows |
 | Start with Windows | Adds/removes an entry under `HKCU\...\Run`. No admin rights needed. |
 | Services | Show or hide each service. Hidden services are not queried. |
-| Antigravity limits | **Off by default.** See [Antigravity](#antigravity-limits-are-opt-in). |
 | Claude statusLine | Optional live updates from terminal sessions. See below. |
 
 ## How it gets the data
@@ -68,7 +67,6 @@ Changes apply immediately.
 | Claude Code | Today's tokens | `~/.claude/projects/**/*.jsonl` (read-only) |
 | Codex | Signed in?, limits, plan, credits | `codex app-server` JSON-RPC: `account/read`, `account/rateLimits/read` |
 | Antigravity | Today's conversations, running state | `~/.gemini/antigravity*/conversations` file times, process list |
-| Antigravity | Limits (opt-in) | `agy -p "/usage" --output-format json` (no agent turn, no quota used) |
 
 **What it never does:** read `~/.claude/.credentials.json`, `~/.codex/auth.json`, or any other credential; send requests to service servers itself; send any data anywhere. All network traffic is made by the official CLIs.
 
@@ -80,11 +78,10 @@ Safety guard: if a CLI ever treats `/usage` as a prompt instead of a local comma
 |---|---|---|---|
 | Claude Code | `loggedIn: false` | **Sign-in needed** + link | `claude auth login` |
 | Codex | `account: null` | **Sign-in needed** + link | `codex login` |
-| Antigravity (when opted in) | "not logged in" / "authentication required" | **Sign-in needed** + link | `agy` |
 
 Click **Click to sign in: …** to open a terminal running that command. After clicking, the widget re-checks every 15 s for 10 minutes and shows limits as soon as you are signed in.
 
-The widget checks the **CLI** login. Codex shares its login between the app and CLI; the Claude desktop app and Antigravity IDE have separate logins from their CLIs.
+The widget checks the **CLI** login. Codex shares its login between the app and CLI; the Claude desktop app has a separate login from Claude Code.
 
 ## Higher-tier plans
 
@@ -92,7 +89,6 @@ Every limit a CLI reports is shown, however many there are:
 
 - **Claude Code:** `Current week (Sonnet only)` (Max/Team) and per-model rows such as `Current week (Opus 4.6)`
 - **Codex:** extra buckets in `rateLimitsByLimitId` (e.g. a frontier model) as a subheading with their own rows, plus a spend-cap row
-- **Antigravity:** groups with several limits (daily + weekly) as a subheading
 
 <img src="docs/high-tier-example.png" alt="High-tier example" width="320">
 
@@ -107,9 +103,9 @@ Settings → **Connect** registers the widget as Claude Code's `statusLine` comm
 
 It has no effect if you only use the Claude desktop app. **Disconnect** restores any statusLine you had before.
 
-## Antigravity limits are opt-in
+## Why Antigravity limits are not shown
 
-Google's Antigravity FAQ says wrapping `agy` inside third-party applications is not supported on consumer plans, and the [Additional Terms](https://antigravity.google/terms) (Section 6) list account suspension as a possible consequence of using third-party tools to access the service. Although the widget only runs the read-only `/usage` command, it is **off by default**. Turning it on shows a warning first; enabling it is your decision. With it off, the widget still shows today's activity from local files without running `agy`.
+Google's [Antigravity Additional Terms](https://antigravity.google/terms) (Section 6) treat using third-party software to access the service as a breach, and the [Antigravity FAQ](https://antigravity.google/docs/faq/) says wrapping `agy` inside third-party applications is not supported on consumer plans. So this widget **never runs `agy` or talks to Antigravity**. It only reads file timestamps in `~/.gemini/antigravity*/conversations` and the local process list to show today's activity. Check your Antigravity limits in Antigravity itself (`/usage` in the CLI, or the model picker in the IDE).
 
 ## Troubleshooting
 
@@ -120,7 +116,7 @@ AIUsageTracker.exe --diagnose --lang en | Out-String
 
 `--diagnose` queries each service once with the same code as the widget and prints the result. It does not print your email or account IDs.
 
-If a CLI is installed in a non-standard location, set `AI_USAGE_TRACKER_CLAUDE_PATH`, `AI_USAGE_TRACKER_CODEX_PATH`, or `AI_USAGE_TRACKER_AGY_PATH` to its full path.
+If a CLI is installed in a non-standard location, set `AI_USAGE_TRACKER_CLAUDE_PATH` or `AI_USAGE_TRACKER_CODEX_PATH` to its full path.
 
 ## Build from source
 

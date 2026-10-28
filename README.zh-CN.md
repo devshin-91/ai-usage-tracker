@@ -2,7 +2,7 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | **简体中文**
 
-一个适用于 Windows 10/11 的悬浮小组件，在屏幕上显示 **Claude Code**、**Codex** 和 **Antigravity** 的套餐限额已用了多少。无需安装程序或运行时，只有一个可执行文件（约 90KB），属于便携式应用。
+一个适用于 Windows 10/11 的悬浮小组件，在屏幕上显示 **Claude Code** 和 **Codex** 的套餐限额已用了多少，以及今日的 **Antigravity** 活动。无需安装程序或运行时，只有一个可执行文件（约 90KB），属于便携式应用。
 
 <p>
   <img src="docs/widget.png" alt="小组件" width="320">
@@ -34,7 +34,7 @@
 | Windows 10 / 11 | 全部 | 使用系统自带的 .NET Framework 4.8 |
 | [Claude Code](https://code.claude.com) CLI（已登录） | Claude 限额 | Pro / Max / Team 套餐。API 密钥用户只显示 token 合计 |
 | [Codex CLI](https://github.com/openai/codex)（`npm i -g @openai/codex`，已登录） | Codex 限额 | |
-| Antigravity / `agy` CLI | Antigravity 活动（限额为可选，见下文） | |
+| Antigravity（IDE 或 `agy` CLI） | Antigravity 活动 | 不显示限额（[原因](#为什么不显示-antigravity-限额)） |
 
 缺少 CLI 的服务只会显示“未找到 CLI”，其他服务照常工作。
 
@@ -56,7 +56,6 @@
 | 始终置顶 | 固定在其他窗口之上 |
 | 开机自动启动 | 在 `HKCU\...\Run` 中添加 / 删除。无需管理员权限 |
 | 显示的服务 | 按服务切换显示。关闭的服务不会被查询。 |
-| Antigravity 限额查询 | **默认关闭。**见[下文](#antigravity-限额查询为可选项) |
 | Claude statusLine 连接 | 从终端会话实时更新（可选）。见下文 |
 
 ## 数据来源
@@ -68,7 +67,6 @@
 | Claude Code | 今日 token | `~/.claude/projects/**/*.jsonl`（只读） |
 | Codex | 登录状态、限额、套餐、额度 | `codex app-server` JSON-RPC：`account/read`、`account/rateLimits/read` |
 | Antigravity | 今日对话数、运行状态 | `~/.gemini/antigravity*/conversations` 的文件时间、进程列表 |
-| Antigravity | 限额（可选） | `agy -p "/usage" --output-format json`（不启动代理回合，不消耗配额） |
 
 **不会做的事：** 读取 `~/.claude/.credentials.json`、`~/.codex/auth.json` 等认证信息；直接向服务的服务器发送请求；向外部发送任何数据。所有网络通信都由官方 CLI 完成。
 
@@ -80,11 +78,10 @@
 |---|---|---|---|
 | Claude Code | `loggedIn: false` | **需要登录** + 链接 | `claude auth login` |
 | Codex | `account: null` | **需要登录** + 链接 | `codex login` |
-| Antigravity（开启时） | "not logged in" / "authentication required" | **需要登录** + 链接 | `agy` |
 
 点击 **点击登录: …** 会打开一个运行该命令的终端。之后 10 分钟内每 15 秒重新检查一次，登录完成后会立即显示限额。
 
-小组件检查的是 **CLI** 的登录状态。Codex 的应用和 CLI 共享登录，而 Claude 桌面应用和 Antigravity IDE 与各自的 CLI 是分开登录的。
+小组件检查的是 **CLI** 的登录状态。Codex 的应用和 CLI 共享登录，而 Claude 桌面应用与 Claude Code 是分开登录的。
 
 ## 高级套餐
 
@@ -92,7 +89,6 @@ CLI 返回的限额无论有多少都会全部显示：
 
 - **Claude Code：** `Current week (Sonnet only)`（Max/Team），以及 `Current week (Opus 4.6)` 这样的按模型的行
 - **Codex：** `rateLimitsByLimitId` 中的额外额度桶（如前沿模型）以小标题加单独的行显示，另有支出限额行
-- **Antigravity：** 包含多个限额的分组（每日 + 每周）以小标题显示
 
 <img src="docs/high-tier-example.png" alt="高级套餐示例" width="320">
 
@@ -107,9 +103,9 @@ CLI 返回的限额无论有多少都会全部显示：
 
 如果只使用 Claude 桌面应用则没有效果。点击 **断开** 会恢复之前的 statusLine。
 
-## Antigravity 限额查询为可选项
+## 为什么不显示 Antigravity 限额
 
-Google 的 Antigravity FAQ 表示，消费者套餐不支持由第三方应用封装运行 `agy`；[附加条款](https://antigravity.google/terms)第 6 条也写明，使用第三方工具访问服务可能导致账号被停用。虽然小组件只运行只读的 `/usage` 命令，但此功能**默认关闭**。开启时会先显示警告，是否开启由你自行决定。即使关闭，小组件也会在不运行 `agy` 的情况下，从本地文件显示今日活动。
+Google 的 [Antigravity 附加条款](https://antigravity.google/terms)第 6 条将使用第三方软件访问服务视为违约，[Antigravity FAQ](https://antigravity.google/docs/faq/) 也表示消费者套餐不支持由其他应用封装运行 `agy`。因此本小组件**不会运行 `agy`，也不会与 Antigravity 通信**。它只读取 `~/.gemini/antigravity*/conversations` 中的文件时间和本地进程列表来显示今日活动。限额请在 Antigravity 中直接查看（CLI 的 `/usage`，或 IDE 的模型选择菜单）。
 
 ## 故障排查
 
@@ -120,7 +116,7 @@ AIUsageTracker.exe --diagnose --lang zh | Out-String
 
 `--diagnose` 会用与小组件相同的代码查询每个服务一次并输出结果，不会输出邮箱或账号 ID。
 
-如果 CLI 安装在非标准位置，请在环境变量 `AI_USAGE_TRACKER_CLAUDE_PATH`、`AI_USAGE_TRACKER_CODEX_PATH` 或 `AI_USAGE_TRACKER_AGY_PATH` 中设置完整路径。
+如果 CLI 安装在非标准位置，请在环境变量 `AI_USAGE_TRACKER_CLAUDE_PATH` 或 `AI_USAGE_TRACKER_CODEX_PATH` 中设置完整路径。
 
 ## 从源码构建
 
