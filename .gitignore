@@ -2,3 +2,7 @@
 dist/
 data/
 *.tmp
+
+# agent notes kept local (accounts, local paths, progress)
+CLAUDE.local.md
+PROGRESS.md
