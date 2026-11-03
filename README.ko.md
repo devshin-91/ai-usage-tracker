@@ -136,6 +136,10 @@ Windows에 포함된 C# 컴파일러(`csc.exe`, .NET Framework 4.x)로 `src\*.cs
 - [@devshin-91](https://github.com/devshin-91): 아이디어, 요구사항, 테스트
 - **Claude** (Anthropic): 설계와 구현, [Claude Code](https://claude.com/claude-code)로 함께 작업
 
+## 라이선스
+
+All rights reserved. 이 프로젝트는 오픈소스가 아닙니다. [LICENSE](LICENSE)를 참고하세요.
+
 ## 고지
 
 비공식 개인 프로젝트이며 Anthropic, OpenAI, Google과 관련이 없고 이들의 보증이나 후원을 받지 않습니다. Claude, Claude Code, Codex, Antigravity는 각 소유자의 상표이며 호환성을 설명하는 용도로만 사용했습니다. CLI 출력 형식은 언제든 바뀔 수 있습니다. 각 서비스 약관에 맞게 사용하세요.
