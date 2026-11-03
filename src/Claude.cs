@@ -407,6 +407,7 @@ namespace AIUsageTracker
             if (exe == null)
             {
                 usageWindows = null;
+                subscriber = false;
                 usageError = () => L.F("{0} CLI를 찾을 수 없음", "claude");
                 return;
             }

@@ -11,8 +11,8 @@ using System.Windows.Forms;
 [assembly: AssemblyTitle("AI Usage Tracker")]
 [assembly: AssemblyDescription("Floating usage widget for Claude Code, Codex and Antigravity")]
 [assembly: AssemblyProduct("AI Usage Tracker")]
-[assembly: AssemblyVersion("1.0.1.0")]
-[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 
 namespace AIUsageTracker
 {
