@@ -33,6 +33,8 @@ namespace AIUsageTracker
         int hoverButton;   // 0 없음, 1 새로고침, 2 닫기, 3 설정
         readonly List<Tuple<Rectangle, Provider>> loginLinks = new List<Tuple<Rectangle, Provider>>();
         Provider hoverLogin;
+        readonly List<Tuple<Rectangle, Provider>> webLinks = new List<Tuple<Rectangle, Provider>>();
+        Provider hoverWeb;
 
         readonly Font titleFont = new Font("Segoe UI Semibold", 10f);
         readonly Font nameFont = new Font("Segoe UI Semibold", 9.5f);
@@ -308,6 +310,7 @@ namespace AIUsageTracker
         int Render(Graphics g)
         {
             loginLinks.Clear();
+            webLinks.Clear();
             int w = S(LogicalWidth), pad = S(14);
             int y = S(10);
 
@@ -419,6 +422,14 @@ namespace AIUsageTracker
                 }
                 y += textH;
             }
+            if (s.WebLinkUrl != null)
+            {
+                int textW = TextRenderer.MeasureText(s.WebLinkText, smallFont, Size.Empty, TextFormatFlags.NoPadding).Width;
+                var rect = new Rectangle(pad, y, Math.Min(textW + S(4), w - 2 * pad), textH);
+                webLinks.Add(Tuple.Create(rect, p));
+                if (g != null) DrawText(g, s.WebLinkText, hoverWeb == p ? linkHoverFont : smallFont, Link, rect, TextFormatFlags.Left);
+                y += textH;
+            }
             foreach (var line in s.Lines)
             {
                 if (g != null) DrawText(g, line, smallFont, Dim, new Rectangle(pad, y, w - 2 * pad, textH), TextFormatFlags.Left);
@@ -465,11 +476,13 @@ namespace AIUsageTracker
             base.OnMouseMove(e);
             int h = refreshButton.Contains(e.Location) ? 1 : closeButton.Contains(e.Location) ? 2 : settingsButton.Contains(e.Location) ? 3 : 0;
             Provider link = LoginLinkAt(e.Location);
-            if (h != hoverButton || link != hoverLogin)
+            Provider web = WebLinkAt(e.Location);
+            if (h != hoverButton || link != hoverLogin || web != hoverWeb)
             {
                 hoverButton = h;
                 hoverLogin = link;
-                Cursor = link != null ? Cursors.Hand : Cursors.Default;
+                hoverWeb = web;
+                Cursor = link != null || web != null ? Cursors.Hand : Cursors.Default;
                 Invalidate();
             }
         }
@@ -477,10 +490,11 @@ namespace AIUsageTracker
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            if (hoverButton != 0 || hoverLogin != null)
+            if (hoverButton != 0 || hoverLogin != null || hoverWeb != null)
             {
                 hoverButton = 0;
                 hoverLogin = null;
+                hoverWeb = null;
                 Cursor = Cursors.Default;
                 Invalidate();
             }
@@ -491,6 +505,29 @@ namespace AIUsageTracker
             foreach (var link in loginLinks)
                 if (link.Item1.Contains(pt)) return link.Item2;
             return null;
+        }
+
+        Provider WebLinkAt(Point pt)
+        {
+            foreach (var link in webLinks)
+                if (link.Item1.Contains(pt)) return link.Item2;
+            return null;
+        }
+
+        void OpenWebLink(Provider p)
+        {
+            var s = p.Last;
+            if (s == null || s.WebLinkUrl == null) return;
+            try
+            {
+                var psi = new ProcessStartInfo(s.WebLinkUrl);
+                psi.UseShellExecute = true;
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, L.F("페이지를 열 수 없음: {0}", ex.Message), L.T("AI 사용량"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // 공식 로그인 명령을 새 콘솔 창에서 실행한다. 로그인은 그 창에서 사용자가 직접 진행한다.
@@ -523,6 +560,8 @@ namespace AIUsageTracker
             if (closeButton.Contains(e.Location)) { HideToTray(); return; }
             var login = LoginLinkAt(e.Location);
             if (login != null) { OpenLogin(login); return; }
+            var web = WebLinkAt(e.Location);
+            if (web != null) { OpenWebLink(web); return; }
             ReleaseCapture();
             SendMessage(Handle, 0xA1, (IntPtr)2, IntPtr.Zero);   // WM_NCLBUTTONDOWN + HTCAPTION: 창 끌기
         }

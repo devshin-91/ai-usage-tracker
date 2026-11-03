@@ -77,6 +77,8 @@ namespace AIUsageTracker
         public string LoginExe;       // 위 명령을 실제로 실행할 CLI 경로와 인자
         public bool LoginIsScript;
         public string LoginArgs = "";
+        public string WebLinkText;    // 브라우저로 여는 공식 페이지 링크. 위젯은 페이지 내용을 읽지 않는다
+        public string WebLinkUrl;
 
         public void NeedLogin(string display, string exe, bool isScript, string args)
         {

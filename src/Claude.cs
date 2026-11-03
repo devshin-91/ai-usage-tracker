@@ -328,6 +328,8 @@ namespace AIUsageTracker
         string plan;
         string cliExe;
         bool cliIsScript;
+        bool subscriber;
+        const string UsagePageUrl = "https://claude.ai/settings/usage";
 
         public ClaudeProvider()
         {
@@ -369,6 +371,12 @@ namespace AIUsageTracker
                 }
                 foreach (var w in rows) s.Windows.Add(w.ToWindow());
                 if (usageError != null) s.Lines.Add(L.F("한도 %: {0}", usageError()));
+                // 잔여 크레딧과 지출 내역은 공식 CLI로 조회할 수 없어서 공식 페이지를 열어 주기만 한다
+                if (subscriber)
+                {
+                    s.WebLinkText = L.T("사용 크레딧 확인 (claude.ai)");
+                    s.WebLinkUrl = UsagePageUrl;
+                }
             }
 
             try
@@ -420,6 +428,7 @@ namespace AIUsageTracker
                 string subscription = Json.Str(auth, "subscriptionType");
                 plan = Fmt.PlanName(subscription);
                 string method = Json.Str(auth, "authMethod") ?? "";
+                subscriber = !string.IsNullOrEmpty(subscription) && method.IndexOf("api", StringComparison.OrdinalIgnoreCase) < 0;
                 if (method.IndexOf("api", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     usageWindows = null;

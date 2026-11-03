@@ -102,6 +102,8 @@ namespace AIUsageTracker
             Add(" · 마지막 활동 {0}", " · last active {0}", " · 最終アクティビティ {0}", " · 最近活动 {0}");
             Add("로그인 필요", "Sign-in needed", "ログインが必要", "需要登录");
             Add("클릭하여 로그인: {0}", "Click to sign in: {0}", "クリックしてログイン: {0}", "点击登录: {0}");
+            Add("사용 크레딧 확인 (claude.ai)", "Check usage credits (claude.ai)", "使用クレジットを確認 (claude.ai)", "查看使用积分 (claude.ai)");
+            Add("페이지를 열 수 없음: {0}", "Can't open the page: {0}", "ページを開けません: {0}", "无法打开页面: {0}");
             Add("로그인 창을 열 수 없음: {0}", "Couldn't open the sign-in window: {0}", "ログイン画面を開けません: {0}", "无法打开登录窗口: {0}");
             Add("로그인: 터미널에서 {0} 실행","To sign in, run {0} in a terminal", "ログイン: ターミナルで {0} を実行", "登录: 在终端运行 {0}");
 

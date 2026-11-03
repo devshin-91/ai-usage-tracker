@@ -43,6 +43,7 @@ A service whose CLI is missing just shows a "CLI not found" line; the others kee
 - **Header buttons:** ⚙ settings, ⟳ refresh now, ✕ hide to tray (click the tray icon to show it again)
 - **Right-click** the widget or tray icon: refresh, settings, open data folder, exit
 - Bars turn orange at 75% and red at 90%. All percentages are **used** amounts.
+- **Check usage credits (claude.ai)** in the Claude Code section opens claude.ai's usage page in your browser. See [Claude Code usage credits](#claude-code-usage-credits).
 
 ### Settings (⚙)
 
@@ -102,6 +103,10 @@ Settings → **Connect** registers the widget as Claude Code's `statusLine` comm
 - A status line such as `Opus 5.5 · 5h 51% (3h 31m) · 7d 7% · ctx 42%` appears at the bottom of the terminal.
 
 It has no effect if you only use the Claude desktop app. **Disconnect** restores any statusLine you had before.
+
+## Claude Code usage credits
+
+The widget doesn't show your Claude Code credit balance or spending history, because the official CLI's `/usage` output in non-interactive mode doesn't include them. Instead, signed-in subscribers get a link that opens [claude.ai/settings/usage](https://claude.ai/settings/usage) in the default browser. The widget doesn't read that page or send it any request.
 
 ## Why Antigravity limits are not shown
 
