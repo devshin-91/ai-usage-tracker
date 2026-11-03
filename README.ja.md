@@ -131,6 +131,11 @@ build.cmd
 
 Windows に付属する C# コンパイラー（`csc.exe`、.NET Framework 4.x）で `src\*.cs` を `dist\AIUsageTracker.exe` にコンパイルします。追加のダウンロードは不要です。
 
+## コントリビューター
+
+- [@devshin-91](https://github.com/devshin-91): アイデア、要件、テスト
+- **Claude** (Anthropic): 設計と実装、[Claude Code](https://claude.com/claude-code) で共同作業
+
 ## 免責事項
 
 非公式の個人プロジェクトであり、Anthropic、OpenAI、Google とは関係がなく、承認や後援も受けていません。Claude、Claude Code、Codex、Antigravity は各所有者の商標で、互換性の説明のためにのみ使用しています。CLI の出力形式はいつでも変わる可能性があります。各サービスの規約に沿ってご利用ください。

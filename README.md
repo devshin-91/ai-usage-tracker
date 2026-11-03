@@ -131,6 +131,11 @@ build.cmd
 
 Compiles `src\*.cs` into `dist\AIUsageTracker.exe` with the C# compiler that ships with Windows (`csc.exe`, .NET Framework 4.x). Nothing needs to be downloaded.
 
+## Contributors
+
+- [@devshin-91](https://github.com/devshin-91): idea, requirements, testing
+- **Claude** (Anthropic): design and implementation, pair-programmed in [Claude Code](https://claude.com/claude-code)
+
 ## Disclaimer
 
 This is an unofficial, independent project. It is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google. Claude, Claude Code, Codex, and Antigravity are trademarks of their respective owners and are used here only to describe compatibility. Output formats of the CLIs may change at any time. Make sure your use complies with each service's terms.

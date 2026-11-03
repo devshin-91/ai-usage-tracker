@@ -131,6 +131,11 @@ build.cmd
 
 使用 Windows 自带的 C# 编译器（`csc.exe`，.NET Framework 4.x）把 `src\*.cs` 编译为 `dist\AIUsageTracker.exe`，无需下载任何东西。
 
+## 贡献者
+
+- [@devshin-91](https://github.com/devshin-91): 想法、需求、测试
+- **Claude** (Anthropic): 设计与实现，通过 [Claude Code](https://claude.com/claude-code) 协作完成
+
 ## 免责声明
 
 这是一个非官方的个人项目，与 Anthropic、OpenAI、Google 无关，也未获得其认可或赞助。Claude、Claude Code、Codex、Antigravity 是其各自所有者的商标，此处仅用于说明兼容性。CLI 的输出格式可能随时变化。请确保你的使用方式符合各服务的条款。
